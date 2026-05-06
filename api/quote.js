@@ -40,22 +40,23 @@ export default async function handler(req, res) {
   ].join('\n');
 
   try {
-    const { error } = await resend.emails.send({
+    const { data, error } = await resend.emails.send({
       from: 'Residential Solutions <onboarding@resend.dev>',
       to: TO,
-      reply_to: email,
+      replyTo: email,
       subject: `Quote request: ${service} — ${name}`,
       text,
     });
 
     if (error) {
       console.error('Resend error:', error);
-      return res.status(502).json({ error: 'Email provider error' });
+      const detail = error.message || error.name || 'unknown';
+      return res.status(502).json({ error: `Email provider error: ${detail}` });
     }
 
-    return res.status(200).json({ ok: true });
+    return res.status(200).json({ ok: true, id: data && data.id });
   } catch (err) {
     console.error('Send failure:', err);
-    return res.status(500).json({ error: 'Failed to send email' });
+    return res.status(500).json({ error: `Failed to send email: ${err.message || 'unknown'}` });
   }
 }
