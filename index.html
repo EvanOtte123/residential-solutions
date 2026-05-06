@@ -1526,8 +1526,7 @@ document.getElementById('qSubmit')?.addEventListener('click', async ()=>{
     });
 
     if(!resp.ok){
-      let msg = 'Something went wrong sending your request. Please try again, or text us at (206) 683-0796.';
-      try { const data = await resp.json(); if(data && data.error) msg = data.error + ' \u2014 please try again or text us at (206) 683-0796.'; } catch(_){}
+      const msg = 'Couldn\u2019t send your request right now \u2014 please try again, or text Austin at (206) 683-0796.';
       if(errorEl){ errorEl.textContent = msg; errorEl.style.display = 'block'; errorEl.scrollIntoView({block:'center', behavior:'smooth'}); }
       submitBtn.disabled = false;
       submitBtn.style.opacity = '';
@@ -1541,7 +1540,7 @@ document.getElementById('qSubmit')?.addEventListener('click', async ()=>{
     document.getElementById('quoteSuccess').scrollIntoView({block:'center', behavior:'smooth'});
   } catch(err) {
     if(errorEl){
-      errorEl.textContent = 'Connection problem \u2014 please try again, or text us at (206) 683-0796.';
+      errorEl.textContent = 'Couldn\u2019t send your request right now \u2014 please try again, or text Austin at (206) 683-0796.';
       errorEl.style.display = 'block';
       errorEl.scrollIntoView({block:'center', behavior:'smooth'});
     }
