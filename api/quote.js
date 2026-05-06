@@ -1,15 +1,13 @@
-import { Resend } from 'resend';
-
-const resend = new Resend(process.env.RESEND_API_KEY);
-const TO = process.env.CONTACT_EMAIL;
-
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  if (!process.env.RESEND_API_KEY || !TO) {
+  const apiKey = process.env.RESEND_API_KEY;
+  const TO = process.env.CONTACT_EMAIL;
+
+  if (!apiKey || !TO) {
     return res.status(500).json({ error: 'Server email not configured' });
   }
 
@@ -40,21 +38,33 @@ export default async function handler(req, res) {
   ].join('\n');
 
   try {
-    const { data, error } = await resend.emails.send({
-      from: 'Residential Solutions <onboarding@resend.dev>',
-      to: TO,
-      replyTo: email,
-      subject: `Quote request: ${service} — ${name}`,
-      text,
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: 'Residential Solutions <onboarding@resend.dev>',
+        to: TO,
+        reply_to: email,
+        subject: `Quote request: ${service} — ${name}`,
+        text,
+      }),
     });
 
-    if (error) {
-      console.error('Resend error:', error);
-      const detail = error.message || error.name || 'unknown';
-      return res.status(502).json({ error: `Email provider error: ${detail}` });
+    const responseBody = await response.text();
+
+    if (!response.ok) {
+      console.error('Resend API error:', response.status, responseBody);
+      return res.status(502).json({
+        error: 'Email provider error',
+        status: response.status,
+        body: responseBody,
+      });
     }
 
-    return res.status(200).json({ ok: true, id: data && data.id });
+    return res.status(200).json({ ok: true, response: responseBody });
   } catch (err) {
     console.error('Send failure:', err);
     return res.status(500).json({ error: `Failed to send email: ${err.message || 'unknown'}` });
