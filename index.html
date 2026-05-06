@@ -221,16 +221,9 @@ a{color:inherit}
   transform: scale(1.28);
   transform-origin: center center;
   mix-blend-mode: multiply;
-}
-/* Subtle edge feather only at the very borders — multiply blend handles the rest */
-.hero-logo::before{
-  content:"";
-  position:absolute;
-  pointer-events:none;
-  z-index:1;
-  inset:0;
-  background:
-    linear-gradient(to bottom, var(--tan-bg) 0%, transparent 5%, transparent 95%, var(--tan-bg) 100%);
+  /* Radial vignette mask — feathers all four sides of the photo into the page bg naturally */
+  -webkit-mask-image: radial-gradient(ellipse 75% 75% at center, #000 50%, transparent 96%);
+  mask-image: radial-gradient(ellipse 75% 75% at center, #000 50%, transparent 96%);
 }
 
 .hero-headline{
